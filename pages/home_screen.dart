@@ -16,11 +16,11 @@ class HomeScreen extends StatelessWidget {
           Text("welcome to home screen"),
           Center(
             child: ElevatedButton(
-                onPressed: () {
-                  FirebaseAuth.instance.signOut();
-                  Navigator.pushNamed(context, 'first');
+                onPressed: () async {
+                 await FirebaseAuth.instance.signOut();
+                  Navigator.pushReplacementNamed(context, 'login');
                 },
-                child: Text("Logout")),
+                child: const Text("Logout")),
           )
         ],
       ),

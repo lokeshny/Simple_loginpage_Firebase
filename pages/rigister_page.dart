@@ -51,8 +51,18 @@ class _RegisterPageState extends State<RegisterPage> {
                         .createUserWithEmailAndPassword(
                             email: emailController.text.trim(),
                             password: passwordController.text.trim());
-                    Navigator.pushNamed(context, 'home');
+                    Navigator.pushNamed(context, 'noteHome');
                   } on FirebaseAuthException catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: const Text('snack'),
+                      /*duration: const Duration(seconds: 1),*/
+                      action: SnackBarAction(
+                        label: 'ACTION',
+                        onPressed: () {
+
+                        },
+                      ),
+                    ));
                     print(e);
                   }
                 }
