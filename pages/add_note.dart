@@ -16,7 +16,7 @@ class _AddNoteState extends State<AddNote> {
    void add() async {
      CollectionReference ref = FirebaseFirestore.instance
          .collection('users')
-         .doc("private")
+         .doc(FirebaseAuth.instance.currentUser?.uid)
          .collection('notes');
 
      var data = {

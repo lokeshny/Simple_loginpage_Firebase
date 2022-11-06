@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page_firebase_app/service/firebase_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -9,7 +10,9 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final FirebaseAuth auth = FirebaseAuth.instance;
   String email = '', password = '';
+  final AuthService service = AuthService();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -45,26 +48,19 @@ class _RegisterPageState extends State<RegisterPage> {
         Center(
           child: ElevatedButton(
               onPressed: () async {
-                {
-                  try {
-                    UserCredential userCredential = await FirebaseAuth.instance
-                        .createUserWithEmailAndPassword(
-                            email: emailController.text.trim(),
-                            password: passwordController.text.trim());
-                    Navigator.pushNamed(context, 'noteHome');
-                  } on FirebaseAuthException catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: const Text('snack'),
-                      /*duration: const Duration(seconds: 1),*/
-                      action: SnackBarAction(
-                        label: 'ACTION',
-                        onPressed: () {
-
-                        },
-                      ),
-                    ));
-                    print(e);
-                  }
+                dynamic result = await service.signUp(emailController.text,passwordController.text);
+                if (result == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: const Text('snack'),
+                    duration: const Duration(seconds: 1),
+                    action: SnackBarAction(
+                      label: 'ACTION',
+                      onPressed: () {},
+                    ),
+                  ));
+                } else {
+                  Navigator.pushReplacementNamed(context, 'noteHome');
+                  print("Signed in");
                 }
               },
               child: Text("Register")),

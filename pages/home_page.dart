@@ -3,9 +3,10 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_page_firebase_app/pages/viewnote.dart';
+import 'package:login_page_firebase_app/pages/view_note.dart';
 import 'package:login_page_firebase_app/widgits/note_cell.dart';
 
+import '../service/firebase_service.dart';
 import 'add_note.dart';
 
 class Homepage extends StatefulWidget {
@@ -16,29 +17,13 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
+  AuthService service = AuthService();
   List<Color> myColors = [
     Colors.cyan.shade200,
     Colors.teal.shade200,
     Colors.tealAccent.shade200,
     Colors.pink.shade200,
   ];
-
-  /*CollectionReference ref = FirebaseFirestore.instance
-      .collection('users')
-      .doc(FirebaseAuth.instance.currentUser?.uid)
-      .collection('notes');*/
-
-  Future signOut() async {
-    await FirebaseAuth.instance.signOut();
-  }
-
-  CollectionReference<Map<String, dynamic>> getQuery() {
-    /* lokesh.log(FirebaseAuth.instance.currentUser!.uid);*/
-    return FirebaseFirestore.instance
-        .collection('users')
-        .doc("private")
-        .collection('notes');
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,10 +78,28 @@ class _HomepageState extends State<Homepage> {
                 Row(
                   children: [
                     Row(
-                      children: const [
-                        SizedBox(
+                      children: [
+                        const SizedBox(
                           width: 10,
                         ),
+                        /*IconButton(
+                            onPressed: () {},
+                            icon: const Icon(
+                              Icons.grid_view_outlined,
+                              size: 25,
+                            ))*/
+                        IconButton(
+                            onPressed: ()  {
+                             service.signOut();
+                                Navigator.pushReplacementNamed(
+                                    context, 'login');
+                                print("Signed out");
+                              },
+
+                            icon: const Icon(
+                              Icons.logout,
+                              size: 25,
+                            )),
                       ],
                     ),
                   ],
@@ -108,9 +111,8 @@ class _HomepageState extends State<Homepage> {
             height: 20,
           ),
           FutureBuilder<QuerySnapshot>(
-            future: getQuery().get(),
+            future: service.ref.get(),
             builder: (context, snapshot) {
-              lokesh.log("11111111");
               if (snapshot.hasData) {
                 lokesh.log("${snapshot.data!.docs.length}");
                 if (snapshot.data!.docs.isEmpty) {

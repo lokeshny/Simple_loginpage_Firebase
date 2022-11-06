@@ -1,8 +1,12 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../service/firebase_service.dart';
+
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final AuthService service = AuthService();
+
+  HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -16,9 +20,13 @@ class HomeScreen extends StatelessWidget {
           Text("welcome to home screen"),
           Center(
             child: ElevatedButton(
-                onPressed: () async {
-                 await FirebaseAuth.instance.signOut();
-                  Navigator.pushReplacementNamed(context, 'login');
+                onPressed: ()  {
+                  dynamic result =  service.signOut();
+                  if (result == null) {
+                  } else {
+                    Navigator.pushReplacementNamed(context, 'login');
+                    print("Signed out");
+                  }
                 },
                 child: const Text("Logout")),
           )
