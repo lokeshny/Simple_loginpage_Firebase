@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page_firebase_app/pages/search_note.dart';
 import 'package:login_page_firebase_app/pages/view_note.dart';
 import 'package:login_page_firebase_app/widgits/note_cell.dart';
 
@@ -63,16 +64,23 @@ class _HomepageState extends State<Homepage> {
                   height: 55,
                   width: 150,
 // )),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      TextField(
-                        decoration: InputDecoration(
-                            hintText: 'Search your notes',
-                            border: InputBorder.none),
+                  child: GestureDetector(
+                    child: Container(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children:  [
+                          TextField(
+                            decoration: InputDecoration(
+                                hintText: 'Search your notes',
+                                border: InputBorder.none),
+                            onTap: () {
+                              Navigator.pushReplacementNamed(context, 'search');
+                            }
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
                 Row(

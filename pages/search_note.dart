@@ -1,173 +1,153 @@
-import 'package:flutter/cupertino.dart';
 
-class SearchView extends StatefulWidget {
-  const SearchView({Key? key}) : super(key: key);
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'note.dart';
+
+class SearchNote extends StatefulWidget {
+  const SearchNote({Key? key}) : super(key: key);
 
   @override
-  _SearchViewState createState() => _SearchViewState();
+  State<SearchNote> createState() => _SearchNoteState();
 }
 
+class _SearchNoteState extends State<SearchNote> {
 
+  String searchTitle = ' ';
 
-class _SearchViewState extends State<SearchView> {
+  List<Note> notes = [];
+  List<Note> filteredList = [];
 
-  List<int> SearchResultIDs = [];
-  List<Note?> SearchResultNotes = [];
-
-  bool isLoading = false;
-
-  void SearchResults(String query) async{
-    SearchResultNotes.clear();
-    setState(() {
-      isLoading = true;
-    });
-    final ResultIds = await NotesDatabse.instance.getNoteString(query); //= [1,2,3,4,5]
-    List<Note?> SearchResultNotesLocal = []; //[nOTE1, nOTE2]
-    ResultIds.forEach((element) async{
-      final SearchNote = await NotesDatabse.instance.readOneNote(element);
-      SearchResultNotesLocal.add(SearchNote);
-      setState(() {
-
-        SearchResultNotes.add(SearchNote);
-
-      });
-    });
-
-    setState(() {
-      isLoading = false;
-    });
+  @override
+  void initState() {
+    super.initState();
+    fetchNotes();
   }
+
+  fetchNotes() async {
+    final notesDocuments = await FirebaseFirestore.instance
+        .collection("users")
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .collection('notes')
+        .get();
+
+    notes =
+        notesDocuments.docs.map((e) => Note.fromDocumentsSnapshot(e)).toList();
+  }
+
+  initSearchingNotes(String textEntered) {
+    filteredList =
+        notes.where((note) => note.title!.contains(textEntered)).toList();
+
+    setState(() {});
+  }
+
+  final user = FirebaseAuth.instance.currentUser;
+  CollectionReference ref = FirebaseFirestore.instance
+      .collection('users')
+      .doc(FirebaseAuth.instance.currentUser?.uid)
+      .collection('notes');
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        backgroundColor: bgColor,
-        body: SingleChildScrollView(
-          child: SafeArea(
-              child: Container(
-                decoration: BoxDecoration(color: white.withOpacity(0.1)),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        IconButton(onPressed: () {
-                          Navigator.pop(context);
-                        }, icon: Icon(Icons.arrow_back_outlined) , color: white, ),
-                        Expanded(
-                          child: TextField(
-                            textInputAction: TextInputAction.search,
-                            style: TextStyle(
-                                color: Colors.white
-                            ),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              enabledBorder: InputBorder.none,
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              hintText: "Search Your Notes",
-                              hintStyle:
-                              TextStyle(color: white.withOpacity(0.5), fontSize: 16),
-                            ),
-                            onSubmitted: (value){
-                              setState(() {
+      return  Scaffold(
+        appBar: AppBar(
 
-                                SearchResults(value.toLowerCase());
-                              });
-                            },
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, 'noteHome');
+            },
+          ),
+          title: TextField(
+            decoration: InputDecoration(
+                suffixIcon: IconButton(
+                  onPressed: () {
+                    // initSearchingNotes(searchTitle);
+                  },
+                  icon: const Icon(Icons.search),
+                ),
+                hintText: 'Search...'),
+            onChanged: (textEntered) {
+              initSearchingNotes(textEntered);
+              // setState(() {
+              //   searchTitle = textEntered;
+              // });
+            },
+          ),
+        ),
+        body: ListView.builder(
+            itemBuilder: (context, index) {
+              final note = filteredList[index];
+              return Card(
+                  margin: const EdgeInsets.all(22),
+                  shape:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  // color: bg,
+                  child: Padding(
+                    padding: const EdgeInsets.all(40.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          note.title ?? " ",
+                          style: const TextStyle(
+                            fontSize: 24.0,
+                            fontWeight: FontWeight.normal,
+                            color: Colors.black87,
                           ),
                         ),
                       ],
                     ),
-                    isLoading ? Center(child: CircularProgressIndicator(color: Colors.white,),) :  NoteSectionAll()
-
-                  ],
-                ),
-              )
-          ),
-        )
-    );
+                  ));
+            },
+            itemCount: filteredList.length),
+        // body: FutureBuilder<QuerySnapshot>(
+        //   future: postDocumentLists?.whenComplete(() => () {
+        //         postDocumentLists;
+        //       }),
+        //   builder: (context, snapshot) {
+        //     if (snapshot.hasData) {
+        //       if (snapshot.data!.docs.isEmpty) {
+        //         return const Center(
+        //           child: Text("You have no notes"),
+        //         );
+        //       }
+        //       return ListView.builder(
+        //         shrinkWrap: true,
+        //         itemCount: snapshot.data?.docs.length,
+        //         itemBuilder: (context, index) {
+        //           Map? data = snapshot.data?.docs[index].data() as Map;
+        //
+        //           return Card(
+        //               margin: const EdgeInsets.all(22),
+        //               shape: OutlineInputBorder(
+        //                   borderRadius: BorderRadius.circular(12)),
+        //               // color: bg,
+        //               child: Padding(
+        //                 padding: const EdgeInsets.all(40.0),
+        //                 child: Column(
+        //                   children: [
+        //                     Text(
+        //                       data['title'],
+        //                       style: const TextStyle(
+        //                         fontSize: 24.0,
+        //                         fontWeight: FontWeight.normal,
+        //                         color: Colors.black87,
+        //                       ),
+        //                     ),
+        //                   ],
+        //                 ),
+        //               ));
+        //         },
+        //       );
+        //     } else {
+        //       return const Center(
+        //         child: Text("Loading"),
+        //       );
+        //     }
+        //   },
+        // ),
+      );
+    }
   }
-
-
-
-
-
-
-
-  Widget NoteSectionAll() {
-    return Container(
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 25, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Text(
-                    "SEARCH RESULTS",
-                    style: TextStyle(
-                        color: white.withOpacity(0.5),
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 15,
-                ),
-                child: StaggeredGridView.countBuilder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    itemCount: SearchResultNotes.length,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    crossAxisCount: 4,
-                    staggeredTileBuilder: (index) => StaggeredTile.fit(2),
-                    itemBuilder: (context, index) =>
-                        InkWell(
-                          onTap: ()
-                          {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => NoteView(note: SearchResultNotes[index])));
-                          },
-                          child:
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border.all(color: white.withOpacity(0.4)),
-                                borderRadius: BorderRadius.circular(7)),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(SearchResultNotes[index]!.title,
-                                    style: TextStyle(
-                                        color: white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold)),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(SearchResultNotes[index]!.content.length > 250
-                                    ? "${SearchResultNotes[index]!.content.substring(0, 250)}..."
-                                    : SearchResultNotes[index]!.content,
-
-                                  style: TextStyle(color: white),
-                                )
-                              ],
-                            ),
-                          ),
-
-                        )
-                )
-            ),
-          ],
-        )
-    );
-  }
-
-
-
-}
