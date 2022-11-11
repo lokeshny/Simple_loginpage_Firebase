@@ -1,12 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../model/note.dart';
+
 class NoteCell extends StatelessWidget {
 
   final Color color;
-  final String title;
+  final Note note;
   final Function() onTap;
-  const NoteCell({Key? key, required this.color, required this.title, required this.onTap}) : super(key: key);
+  const NoteCell({Key? key, required this.color, required this.onTap, required this.note}) : super(key: key);
 
 
 
@@ -24,7 +26,7 @@ class NoteCell extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  title,
+                  note.title ?? " ",
                   style: const TextStyle(
                     fontSize: 20.0,
                     fontWeight: FontWeight.normal,

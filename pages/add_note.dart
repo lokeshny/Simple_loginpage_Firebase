@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
+
+import '../model/note.dart';
 
 class AddNote extends StatefulWidget {
   const AddNote({Key? key}) : super(key: key);
@@ -10,8 +13,8 @@ class AddNote extends StatefulWidget {
 }
 
 class _AddNoteState extends State<AddNote> {
-   String? title;
-   String? des;
+  String? title;
+  String? description;
 
    void add() async {
      CollectionReference ref = FirebaseFirestore.instance
@@ -19,11 +22,13 @@ class _AddNoteState extends State<AddNote> {
          .doc(FirebaseAuth.instance.currentUser?.uid)
          .collection('notes');
 
+     final String id = Uuid().v4();
+
      var data = {
        'title': title,
-       'contents': des,
+       'contents': description,
+       'id':id
      };
-
      ref.add(data);
      /*Navigator.of(context).pop();*/
      Navigator.pop(context);
@@ -47,6 +52,7 @@ class _AddNoteState extends State<AddNote> {
                 }, child: Icon(Icons.arrow_back)),
                 ElevatedButton(
                     onPressed: add,
+
                     child: Text("Save"))
               ],
             ),
@@ -77,7 +83,7 @@ class _AddNoteState extends State<AddNote> {
                       fontSize: 20.0,
                     ),
                     onChanged: (val) {
-                      des = val;
+                     description = val;
                     },
                   ),
                 )

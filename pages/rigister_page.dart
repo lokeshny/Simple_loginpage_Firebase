@@ -12,7 +12,6 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   final FirebaseAuth auth = FirebaseAuth.instance;
   String email = '', password = '';
-  final AuthService service = AuthService();
 
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -48,7 +47,7 @@ class _RegisterPageState extends State<RegisterPage> {
         Center(
           child: ElevatedButton(
               onPressed: () async {
-                dynamic result = await service.signUp(emailController.text,passwordController.text);
+                dynamic result = await AuthService.instance.signUp(emailController.text,passwordController.text);
                 if (result == null) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                     content: const Text('snack'),

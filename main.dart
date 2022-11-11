@@ -48,6 +48,8 @@ class MyApp extends StatelessWidget {
           'noteHome' : (context) =>Homepage(),
           'search' : (context) =>SearchNote(),
 
+
+
         }
     );
   }

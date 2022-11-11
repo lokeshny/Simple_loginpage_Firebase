@@ -1,9 +1,13 @@
 
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'note.dart';
+import 'package:login_page_firebase_app/pages/view_note.dart';
+import 'package:login_page_firebase_app/widgits/note_cell.dart';
+import '../model/note.dart';
 
 class SearchNote extends StatefulWidget {
   const SearchNote({Key? key}) : super(key: key);
@@ -48,9 +52,17 @@ class _SearchNoteState extends State<SearchNote> {
       .collection('users')
       .doc(FirebaseAuth.instance.currentUser?.uid)
       .collection('notes');
+  
+  List<Color> myColors = [
+    Colors.cyan.shade200,
+    Colors.teal.shade200,
+    Colors.tealAccent.shade200,
+    Colors.pink.shade200,
+  ];
 
   @override
   Widget build(BuildContext context) {
+
       return  Scaffold(
         appBar: AppBar(
 
@@ -80,26 +92,38 @@ class _SearchNoteState extends State<SearchNote> {
         body: ListView.builder(
             itemBuilder: (context, index) {
               final note = filteredList[index];
-              return Card(
-                  margin: const EdgeInsets.all(22),
-                  shape:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  // color: bg,
-                  child: Padding(
-                    padding: const EdgeInsets.all(40.0),
-                    child: Column(
-                      children: [
-                        Text(
-                          note.title ?? " ",
-                          style: const TextStyle(
-                            fontSize: 24.0,
-                            fontWeight: FontWeight.normal,
-                            color: Colors.black87,
+              Random random = Random();
+              Color cl = myColors[random.nextInt(4)];
+              return NoteCell(color: cl, note: note, onTap: (){
+                /*Navigator.of(context)
+                    .push(MaterialPageRoute(
+                    builder: (context) => ViewNote(
+                    data: data,
+                    ref: snapshot.data!.docs[index].reference),*/
+              });
+              return InkWell(
+                onTap:() {},
+                child: Card(
+                    margin: const EdgeInsets.all(22),
+                    shape:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    // color: bg,
+                    child: Padding(
+                      padding: const EdgeInsets.all(40.0),
+                      child: Column(
+                        children: [
+                          Text(
+                            note.title ?? " ",
+                            style: const TextStyle(
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.normal,
+                              color: Colors.black87,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ));
+                        ],
+                      ),
+                    )),
+              );
             },
             itemCount: filteredList.length),
         // body: FutureBuilder<QuerySnapshot>(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:login_page_firebase_app/service/google_auth.dart';
 
 import '../service/firebase_service.dart';
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -14,7 +15,6 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String email = '', password = '';
-  AuthService service = AuthService();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   @override
@@ -50,7 +50,7 @@ class _LoginPageState extends State<LoginPage> {
             child: ElevatedButton(
                 style: ButtonStyle(),
                 onPressed: ()  async {
-                  final isSucces = await service.signIn(emailController.text,passwordController.text);
+                  final isSucces = await AuthService.instance.signIn(emailController.text,passwordController.text);
 
 
                   if(isSucces){
@@ -141,9 +141,13 @@ class _LoginPageState extends State<LoginPage> {
                     border: Border.all(color: Colors.grey, width: 1),
                     borderRadius: BorderRadius.circular(10)),
                 child: IconButton(
-                    onPressed: () {
-                      signInWithGoogle(context);
-                    },
+                    onPressed: () async {
+                      final isSuccess = await signInWithGoogle();
+                      if(isSuccess){
+                        Navigator.pushReplacementNamed(context, 'noteHome');
+                      }else{
+                        //TODO:Show POPUPS
+                      } },
                     icon: Image.asset('image/g.png')),
               ),
             ],

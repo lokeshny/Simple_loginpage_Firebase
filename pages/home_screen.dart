@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import '../service/firebase_service.dart';
 
 class HomeScreen extends StatelessWidget {
-  final AuthService service = AuthService();
-
   HomeScreen({Key? key}) : super(key: key);
 
   @override
@@ -21,7 +19,7 @@ class HomeScreen extends StatelessWidget {
           Center(
             child: ElevatedButton(
                 onPressed: ()  {
-                  dynamic result =  service.signOut();
+                  dynamic result =  AuthService.instance.signOut();
                   if (result == null) {
                   } else {
                     Navigator.pushReplacementNamed(context, 'login');

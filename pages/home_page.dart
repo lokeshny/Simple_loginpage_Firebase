@@ -7,7 +7,9 @@ import 'package:login_page_firebase_app/pages/search_note.dart';
 import 'package:login_page_firebase_app/pages/view_note.dart';
 import 'package:login_page_firebase_app/widgits/note_cell.dart';
 
+import '../model/note.dart';
 import '../service/firebase_service.dart';
+import '../service/google_auth.dart';
 import 'add_note.dart';
 
 class Homepage extends StatefulWidget {
@@ -18,13 +20,60 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-  AuthService service = AuthService();
+
   List<Color> myColors = [
     Colors.cyan.shade200,
     Colors.teal.shade200,
     Colors.tealAccent.shade200,
     Colors.pink.shade200,
   ];
+
+
+  ScrollController scrollController = ScrollController();
+  final List<Note> notesList = [];
+  bool loadding = false;
+
+  initialFetch() async {
+    List<Note> data2 = await AuthService.instance.initialFetch();
+    setState(() {
+      notesList.addAll(data2);
+      loadding = false;
+    });
+  }
+
+  fetchData() async {
+    setState(() {
+      loadding = true;
+    });
+    await Future.delayed(const Duration(milliseconds: 500));
+    List<Note> dataFromFb = await AuthService.instance.fetchMoreData();
+
+    setState(() {
+      notesList.addAll(dataFromFb);
+      loadding = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initialFetch();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent &&
+          !loadding) {
+        fetchData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    scrollController.dispose();
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -69,15 +118,15 @@ class _HomepageState extends State<Homepage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children:  [
+                        children: [
                           TextField(
-                            decoration: InputDecoration(
-                                hintText: 'Search your notes',
-                                border: InputBorder.none),
-                            onTap: () {
-                              Navigator.pushReplacementNamed(context, 'search');
-                            }
-                          ),
+                              decoration: InputDecoration(
+                                  hintText: 'Search your notes',
+                                  border: InputBorder.none),
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                    context, 'search');
+                              }),
                         ],
                       ),
                     ),
@@ -97,13 +146,11 @@ class _HomepageState extends State<Homepage> {
                               size: 25,
                             ))*/
                         IconButton(
-                            onPressed: ()  {
-                             service.signOut();
-                                Navigator.pushReplacementNamed(
-                                    context, 'login');
-                                print("Signed out");
-                              },
-
+                            onPressed: () {
+                              AuthService.instance.signOut();
+                              Navigator.pushReplacementNamed(context, 'login');
+                              print("Signed out");
+                            },
                             icon: const Icon(
                               Icons.logout,
                               size: 25,
@@ -118,80 +165,73 @@ class _HomepageState extends State<Homepage> {
           const SizedBox(
             height: 20,
           ),
-          FutureBuilder<QuerySnapshot>(
-            future: service.ref.get(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                lokesh.log("${snapshot.data!.docs.length}");
-                if (snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text("You have no notes"),
-                  );
-                }
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: snapshot.data?.docs.length,
-                  itemBuilder: (context, index) {
-                    Random random = Random();
-                    Color cl = myColors[random.nextInt(4)];
-                    Map? data = snapshot.data?.docs[index].data() as Map;
-                    return NoteCell(
-                      color: cl,
-                      title: data["title"],
-                      onTap: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                          builder: (context) => ViewNote(
-                              data: data,
-                              ref: snapshot.data!.docs[index].reference),
-                        ))
-                            .then((value) {
-                          setState(() {});
-                        });
-                      },
-                    );
-                    return InkWell(
-                      onTap: () {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(
-                          builder: (context) => ViewNote(
-                              data: data,
-                              ref: snapshot.data!.docs[index].reference),
-                        ))
-                            .then((value) {
-                          setState(() {});
-                        });
-                      },
-                      child: Card(
-                          margin: const EdgeInsets.all(22),
-                          shape: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          color: cl,
-                          child: Padding(
-                            padding: const EdgeInsets.all(40.0),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "${data['title']}",
-                                  style: const TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.normal,
-                                    color: Colors.black45,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )),
-                    );
+            Container(
+              child: GridView.builder  (
+                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    childAspectRatio: 1,
+                    crossAxisSpacing: 15,
+                    mainAxisSpacing: 15),
+                primary: false,
+                shrinkWrap: true,
+                itemCount: notesList.length,
+                itemBuilder: (context, index) {
+                  final Note note = notesList[index];
+                  Random random = Random();
+                  Color cl = myColors[random.nextInt(4)];
+
+                  return NoteCell(
+                    color: cl,
+                    note: note,
+                    onTap: () {}/*{
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                        builder: (context) => ViewNote(
+                            data: data,
+                            ref: snapshot.data!.docs[index].reference),
+                      ))
+                          .then((value) {
+                        setState(() {});
+                      }*/);
+                    },
+                  ),
+            );
+
+                 /*InkWell(
+                  onTap: () {
+                    Navigator.of(context)
+                        .push(MaterialPageRoute(
+                      builder: (context) => ViewNote(
+                          data: data,
+                          ref: snapshot.data!.docs[index].reference),
+                    ))
+                        .then((value) {
+                      setState(() {});
+                    });
                   },
-                );
-              } else {
-                return const Center(
-                  child: Text("Loading"),
-                );
-              }
-            },
-          ),
+                  child: Card(
+                      margin: const EdgeInsets.all(22),
+                      shape: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12)),
+                      color: cl,
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Column(
+                          children: [
+                            Text(
+                              "${data['title']}",
+                              style: const TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.normal,
+                                color: Colors.black45,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )),
+                );*/
+              },
+            );
         ]),
       ),
       //
