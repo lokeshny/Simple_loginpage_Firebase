@@ -24,9 +24,9 @@ class AuthService {
 
   static final FirebaseFirestore firestore = FirebaseFirestore.instance;
   static const uuid = Uuid();
-  static QueryDocumentSnapshot? lastDocument;
+  static QueryDocumentSnapshot? lastNote;
   static get uid => FirebaseAuth.instance.currentUser?.uid;
-  static bool allLoaded = false;
+  static bool allLNotes = false;
   /*final String id = uuid.v4();*/
 
   Future signUp(String email, String password) async {
@@ -84,19 +84,20 @@ class AuthService {
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("notes");
     final snapshot = await ref
-        .orderBy("title")
         .limit(6)
         .get();
     if (snapshot.docs.isNotEmpty) {
-      lastDocument = snapshot.docs.last;
+      lastNote = snapshot.docs.last;
     }
-    print("docs length ${snapshot.docs.length}");
     final List<Note> dataFromFb = [];
-    for (var element in snapshot.docs) {
-      final note = Note.fromDocumentsSnapshot(element);
-      dataFromFb.add(note);
-    }
-    return dataFromFb;
+    final notesList = snapshot.docs.map((document) => Note.fromDocumentsSnapshots(document)).toList();
+    /*for (var element in snapshot.docs) {
+      final data = element.data();
+     *//* final note = Note.fromDocumentsSnapshot(element.data());
+      dataFromFb.add(note);*//*
+      log(element['title']);
+    }*/
+    return notesList;
   }
 
     Future<List<Note>> fetchMoreData() async {
@@ -104,29 +105,31 @@ class AuthService {
           .collection('users')
           .doc(uid)
           .collection("note");
-      if (allLoaded == true) {
+      if (allLNotes == true) {
         return [];
       }
-      if (lastDocument == null) {
+      if (lastNote == null) {
         return [];
       }
       final snapshot = await ref
           .orderBy("title")
-          .startAfterDocument(lastDocument!)
+          .startAfterDocument(lastNote!)
           .limit(6)
           .get();
 
-      lastDocument = snapshot.docs.last;
+      lastNote = snapshot.docs.last;
       final List<Note> dataFromFb = [];
-      for (var element in snapshot.docs) {
-        final note = Note.fromDocumentsSnapshot(element);
+     final notesList = snapshot.docs.map((document) => Note.fromDocumentsSnapshots(document)).toList();
+
+      /*for (var element in snapshot.docs) {
+        final data = element.data();
+        log(element['title']);
+        final note = Note.fromDocumentsSnapshots(element);
         dataFromFb.add(note);
-      }
+      }*/
       if (snapshot.docs.length < 6) {
-        allLoaded = true;
+        allLNotes = true;
       }
-      return dataFromFb;
+      return notesList;
     }
-
-
 }

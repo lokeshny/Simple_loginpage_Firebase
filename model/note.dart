@@ -9,10 +9,15 @@ class Note {
   Note({required this.id, this.title, this.description});
 
   static  Note fromDocumentsSnapshot(QueryDocumentSnapshot<Map<String, dynamic>> e) {
-    return Note(id: "id",title: e['title'],description: e['description']);
+    return Note(id: "id",title: e['title'],description: e['contents']);
   }
 
    static Note fromMap(Map map) {
-    return Note(id: "id",title: map['title'],description: map['description']);
+    return Note(id: "id",title: map['title'],description: map['contents']);
+  }
+
+  static Note fromDocumentsSnapshots(QueryDocumentSnapshot<Object?> element) {
+    return Note(id: "id",title: element['title'],description: element['contents']);
+
   }
 }

@@ -46,10 +46,10 @@ class _HomepageState extends State<Homepage> {
       loadding = true;
     });
     await Future.delayed(const Duration(milliseconds: 500));
-    List<Note> dataFromFb = await AuthService.instance.fetchMoreData();
+    List<Note> data2 = await AuthService.instance.fetchMoreData();
 
     setState(() {
-      notesList.addAll(dataFromFb);
+      notesList.addAll(data2);
       loadding = false;
     });
   }
@@ -139,12 +139,12 @@ class _HomepageState extends State<Homepage> {
                         const SizedBox(
                           width: 10,
                         ),
-                        /*IconButton(
+                        IconButton(
                             onPressed: () {},
                             icon: const Icon(
                               Icons.grid_view_outlined,
                               size: 25,
-                            ))*/
+                            )),
                         IconButton(
                             onPressed: () {
                               AuthService.instance.signOut();
@@ -183,7 +183,13 @@ class _HomepageState extends State<Homepage> {
                   return NoteCell(
                     color: cl,
                     note: note,
-                    onTap: () {}/*{
+                    onTap: (){
+                      Navigator.of(context)
+                          .push(MaterialPageRoute(
+                        builder: (context) => ViewNote(note: note,
+                           ),
+                      ));
+                    } /*{
                       Navigator.of(context)
                           .push(MaterialPageRoute(
                         builder: (context) => ViewNote(
@@ -192,49 +198,14 @@ class _HomepageState extends State<Homepage> {
                       ))
                           .then((value) {
                         setState(() {});
-                      }*/);
-                    },
-                  ),
-            );
+                      });
+                    },*/
+                  );}),
+    ),
 
-                 /*InkWell(
-                  onTap: () {
-                    Navigator.of(context)
-                        .push(MaterialPageRoute(
-                      builder: (context) => ViewNote(
-                          data: data,
-                          ref: snapshot.data!.docs[index].reference),
-                    ))
-                        .then((value) {
-                      setState(() {});
-                    });
-                  },
-                  child: Card(
-                      margin: const EdgeInsets.all(22),
-                      shape: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                      color: cl,
-                      child: Padding(
-                        padding: const EdgeInsets.all(40.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "${data['title']}",
-                              style: const TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.normal,
-                                color: Colors.black45,
-                              ),
-                            ),
-                          ],
-                        ),
-                      )),
-                );*/
-              },
-            );
         ]),
       ),
-      //
+
     ));
   }
 }

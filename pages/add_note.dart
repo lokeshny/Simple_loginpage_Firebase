@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page_firebase_app/service/firebase_note_service.dart';
 import 'package:uuid/uuid.dart';
 
 import '../model/note.dart';
@@ -17,19 +18,7 @@ class _AddNoteState extends State<AddNote> {
   String? description;
 
    void add() async {
-     CollectionReference ref = FirebaseFirestore.instance
-         .collection('users')
-         .doc(FirebaseAuth.instance.currentUser?.uid)
-         .collection('notes');
-
-     final String id = Uuid().v4();
-
-     var data = {
-       'title': title,
-       'contents': description,
-       'id':id
-     };
-     ref.add(data);
+FirebaseNoteService.addNote(title!, description!);
      /*Navigator.of(context).pop();*/
      Navigator.pop(context);
    }
@@ -51,7 +40,11 @@ class _AddNoteState extends State<AddNote> {
                   Navigator.of(context).pop();
                 }, child: Icon(Icons.arrow_back)),
                 ElevatedButton(
-                    onPressed: add,
+                    onPressed: (){
+                      FirebaseNoteService.addNote(title!, description!);
+                      /*Navigator.of(context).pop();*/
+                      Navigator.pop(context);
+                    },
 
                     child: Text("Save"))
               ],

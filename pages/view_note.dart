@@ -4,11 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class ViewNote extends StatefulWidget {
-  final Map data;
-  final DocumentReference ref;
+import '../model/note.dart';
 
-  const ViewNote({super.key, required this.data, required this.ref});
+class ViewNote extends StatefulWidget {
+ /* final Map data;
+  final DocumentReference ref;*/
+
+  final Note note;
+
+  const ViewNote({super.key, required this.note});
+
+  /*const ViewNote({super.key, required this.data, required this.ref});*/
+
 
   @override
   State<ViewNote> createState() => _ViewNoteState();
@@ -22,9 +29,15 @@ class _ViewNoteState extends State<ViewNote> {
   GlobalKey<FormState> key = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    title = widget.note.title;
+    des = widget.note.description;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    title = widget.data['title'];
-    des = widget.data['contents'];
     return Scaffold(
         appBar: AppBar(actions: [
           ElevatedButton(
@@ -89,16 +102,17 @@ class _ViewNoteState extends State<ViewNote> {
         ));
   }
 
-  void delete() async {
-    await widget.ref.delete();
+  void delete()  {
+
+  /*widget.ref.delete();*/
     Navigator.pop(context);
   }
 
   void save() async {
     if (key.currentState!.validate()) {
-      await widget.ref.update(
-        {'title': title, 'note': des},
-      );
+      /*await widget.ref.update(
+        {'title': title, 'note': des},*/
+
       Navigator.of(context).pop();
     }
   }

@@ -10,8 +10,6 @@ class NoteCell extends StatelessWidget {
   final Function() onTap;
   const NoteCell({Key? key, required this.color, required this.onTap, required this.note}) : super(key: key);
 
-
-
   @override
   Widget build(BuildContext context) {
     return InkWell(
