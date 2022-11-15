@@ -12,8 +12,11 @@ class ViewNote extends StatefulWidget {
   final DocumentReference ref;*/
 
   final Note note;
+  final Function() callbackFunctions;
 
-  const ViewNote({super.key, required this.note});
+  const ViewNote({super.key, required this.note, required this.callbackFunctions});
+
+
 
   /*const ViewNote({super.key, required this.data, required this.ref});*/
 
@@ -25,7 +28,6 @@ class ViewNote extends StatefulWidget {
 class _ViewNoteState extends State<ViewNote> {
   String? title;
   String? des;
-  Note? note;
 
   bool edit = true;
   GlobalKey<FormState> key = GlobalKey<FormState>();
@@ -49,13 +51,15 @@ class _ViewNoteState extends State<ViewNote> {
               child: const Icon(Icons.edit)),
           ElevatedButton(
               onPressed: () {
-                FirebaseNoteService.instance.updateNote(Note(id: 'id'));
+                widget.note.title = title;
+                FirebaseNoteService.instance.updateNote(widget.note);
+                widget.callbackFunctions();
                 Navigator.of(context).pop();
               },
               child: const Icon(Icons.save_rounded)),
           ElevatedButton(
               onPressed: () {
-                FirebaseNoteService.instance.deleteNote(Note(id: '$note.id'));
+                FirebaseNoteService.instance.deleteNote(widget.note.id);
                 Navigator.pop(context);
               },
               child: const Icon(Icons.delete))

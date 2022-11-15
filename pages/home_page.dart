@@ -29,14 +29,14 @@ class _HomepageState extends State<Homepage> {
   ];
 
   ScrollController scrollController = ScrollController();
-  final List<Note> notesList = [];
+   List<Note> notesList = [];
   bool loadding = false;
 
   initialFetch() async {
     print("intial fetch");
-    List<Note> data2 = await FirebaseNoteService.instance.initialFetch();
+    List<Note> initialNotes = await FirebaseNoteService.instance.initialFetch();
     setState(() {
-      notesList.addAll(data2);
+      notesList = initialNotes;
       loadding = false;
     });
   }
@@ -46,7 +46,6 @@ class _HomepageState extends State<Homepage> {
       loadding = true;
     });
     print("fetch more");
-    await Future.delayed(const Duration(milliseconds: 50));
     List<Note> data2 = await FirebaseNoteService.instance.fetchMoreData();
 
     setState(() {
@@ -87,6 +86,7 @@ class _HomepageState extends State<Homepage> {
     scrollController.dispose();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -112,7 +112,6 @@ class _HomepageState extends State<Homepage> {
           flex: 1,
           child: Container(
             margin: const EdgeInsets.only(left: 10, right: 10, top: 15),
-            height: 55,
             decoration: BoxDecoration(
                 color: Colors.grey, borderRadius: BorderRadius.circular(40)),
             child: Row(
@@ -176,9 +175,6 @@ class _HomepageState extends State<Homepage> {
             ),
           ),
         ),
-        const SizedBox(
-          height: 20,
-        ),
         Expanded(
           flex: 9,
           child: GridView.builder(
@@ -202,6 +198,10 @@ class _HomepageState extends State<Homepage> {
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => ViewNote(
+                        callbackFunctions: (){
+                          initialFetch();
+                          lokesh.log('inside callback');
+                        },
                         note: note,
                       ),
                     ));

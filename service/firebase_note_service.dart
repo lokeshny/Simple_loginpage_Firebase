@@ -1,3 +1,7 @@
+
+
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:uuid/uuid.dart';
@@ -27,25 +31,38 @@ class FirebaseNoteService {
     ref.add(data);
   }
 
-  void updateNote(Note note) {
+  Future<void> updateNote(Note note) async {
     CollectionReference ref = FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("notes");
-    ref.doc(note.id!).update({
-      /*'id': note.id,*/
+    final  snapshot = await ref.where('id',isEqualTo: note.id).get();
+    for(var doc in snapshot.docs){
+      log('inside snopshots');
+      doc.reference.update({
+        'title': note.title,
+        'content': note.description,
+      });
+    }
+    /*ref.doc(note.id!).update({
+      *//*'id': note.id,*//*
       'title': note.title,
       'content': note.description,
-    });
+    });*/
   }
 
-  void deleteNote(Note note) {
+  Future<void> deleteNote(String id) async {
     CollectionReference ref = FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("notes");
-    ref.doc(note.id!).delete();
-    print('Inside delet');
+    final  snapshot = await ref.where('id',isEqualTo:id).get();
+    for(var doc in snapshot.docs){
+      log('inside snopshots');
+      await doc.reference.delete();
+    }
+    /*ref.doc(note.id!).delete();*/
+    print(id);
   }
 
   Future<List<Note>> initialFetch() async {
