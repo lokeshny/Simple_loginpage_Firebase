@@ -8,6 +8,7 @@ import 'package:login_page_firebase_app/pages/view_note.dart';
 import 'package:login_page_firebase_app/widgits/note_cell.dart';
 
 import '../model/note.dart';
+import '../service/firebase_note_service.dart';
 import '../service/firebase_service.dart';
 import '../service/google_auth.dart';
 import 'add_note.dart';
@@ -20,7 +21,6 @@ class Homepage extends StatefulWidget {
 }
 
 class _HomepageState extends State<Homepage> {
-
   List<Color> myColors = [
     Colors.cyan.shade200,
     Colors.teal.shade200,
@@ -28,13 +28,13 @@ class _HomepageState extends State<Homepage> {
     Colors.pink.shade200,
   ];
 
-
   ScrollController scrollController = ScrollController();
   final List<Note> notesList = [];
   bool loadding = false;
 
   initialFetch() async {
-    List<Note> data2 = await AuthService.instance.initialFetch();
+    print("intial fetch");
+    List<Note> data2 = await FirebaseNoteService.instance.initialFetch();
     setState(() {
       notesList.addAll(data2);
       loadding = false;
@@ -42,11 +42,12 @@ class _HomepageState extends State<Homepage> {
   }
 
   fetchData() async {
-    setState(() {
+     setState(() {
       loadding = true;
     });
-    await Future.delayed(const Duration(milliseconds: 500));
-    List<Note> data2 = await AuthService.instance.fetchMoreData();
+    print("fetch more");
+    await Future.delayed(const Duration(milliseconds: 50));
+    List<Note> data2 = await FirebaseNoteService.instance.fetchMoreData();
 
     setState(() {
       notesList.addAll(data2);
@@ -58,13 +59,26 @@ class _HomepageState extends State<Homepage> {
   void initState() {
     super.initState();
     initialFetch();
-    scrollController.addListener(() {
+    /*scrollController.addListener(() {
+      print("inside listner");
       if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent &&
+              scrollController.position.maxScrollExtent &&
           !loadding) {
+        fetchData();
+
+      }
+    });*/
+    scrollController.addListener(() {
+      print("inside listner");
+      double maxScroll = scrollController.position.maxScrollExtent;
+      double currentScrol = scrollController.position.pixels;
+      double delta = MediaQuery.of(context).size.height*0.25;
+
+      if(maxScroll -currentScrol<= delta){
         fetchData();
       }
     });
+
   }
 
   @override
@@ -72,8 +86,6 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
     scrollController.dispose();
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +107,10 @@ class _HomepageState extends State<Homepage> {
         },
         child: const Icon(Icons.add),
       ),
-      body: SingleChildScrollView(
-        child: Column(children: [
-          Container(
+      body: Column(children: [
+        Expanded(
+          flex: 1,
+          child: Container(
             margin: const EdgeInsets.only(left: 10, right: 10, top: 15),
             height: 55,
             decoration: BoxDecoration(
@@ -162,50 +175,53 @@ class _HomepageState extends State<Homepage> {
               ],
             ),
           ),
-          const SizedBox(
-            height: 20,
-          ),
-            Container(
-              child: GridView.builder  (
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                    maxCrossAxisExtent: 200,
-                    childAspectRatio: 1,
-                    crossAxisSpacing: 15,
-                    mainAxisSpacing: 15),
-                primary: false,
-                shrinkWrap: true,
-                itemCount: notesList.length,
-                itemBuilder: (context, index) {
-                  final Note note = notesList[index];
-                  Random random = Random();
-                  Color cl = myColors[random.nextInt(4)];
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+        Expanded(
+          flex: 9,
+          child: GridView.builder(
+           controller: scrollController,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 200,
+                childAspectRatio: 1,
+                crossAxisSpacing: 15,
+                mainAxisSpacing: 15),
+            primary: false,
+            shrinkWrap: true,
+            itemCount: notesList.length,
+            itemBuilder: (context, index) {
+              final Note note = notesList[index];
+              Random random = Random();
+              Color cl = myColors[random.nextInt(4)];
 
-                  return NoteCell(
-                    color: cl,
-                    note: note,
-                    onTap: (){
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(
-                        builder: (context) => ViewNote(note: note,
-                           ),
-                      ));
-                    } /*{
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(
-                        builder: (context) => ViewNote(
-                            data: data,
-                            ref: snapshot.data!.docs[index].reference),
-                      ))
-                          .then((value) {
-                        setState(() {});
-                      });
-                    },*/
-                  );}),
-    ),
+              return NoteCell(
+                  color: cl,
+                  note: note,
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ViewNote(
+                        note: note,
+                      ),
+                    ));
+                  } /*{
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                    builder: (context) => ViewNote(
+                        data: data,
+                        ref: snapshot.data!.docs[index].reference),
+                  ))
+                      .then((value) {
+                    setState(() {});
+                  });
+                },*/
+              );
+            }),
 
-        ]),
-      ),
+        ),
 
+      ]),
     ));
   }
 }

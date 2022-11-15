@@ -13,7 +13,6 @@ class User {
     'email': email,
     'password': password,
     'id':id
-
   };
 
   static User fromDocumentsSnapshot(DocumentSnapshot<Object?> doc) {

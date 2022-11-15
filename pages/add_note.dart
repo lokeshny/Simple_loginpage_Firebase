@@ -14,8 +14,8 @@ class AddNote extends StatefulWidget {
 }
 
 class _AddNoteState extends State<AddNote> {
-  String? title;
-  String? description;
+  late String title;
+  late String description;
 
    void add() async {
 FirebaseNoteService.addNote(title!, description!);

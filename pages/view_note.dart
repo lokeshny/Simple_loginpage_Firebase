@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../model/note.dart';
+import '../service/firebase_note_service.dart';
 
 class ViewNote extends StatefulWidget {
  /* final Map data;
@@ -24,6 +25,7 @@ class ViewNote extends StatefulWidget {
 class _ViewNoteState extends State<ViewNote> {
   String? title;
   String? des;
+  Note? note;
 
   bool edit = true;
   GlobalKey<FormState> key = GlobalKey<FormState>();
@@ -42,20 +44,19 @@ class _ViewNoteState extends State<ViewNote> {
         appBar: AppBar(actions: [
           ElevatedButton(
               onPressed: () {
-                edit = !edit;
+
               },
               child: const Icon(Icons.edit)),
           ElevatedButton(
               onPressed: () {
-
-                save();
+                FirebaseNoteService.instance.updateNote(Note(id: 'id'));
+                Navigator.of(context).pop();
               },
               child: const Icon(Icons.save_rounded)),
           ElevatedButton(
               onPressed: () {
-                {
-                  delete();
-                }
+                FirebaseNoteService.instance.deleteNote(Note(id: '$note.id'));
+                Navigator.pop(context);
               },
               child: const Icon(Icons.delete))
         ]),
@@ -102,18 +103,4 @@ class _ViewNoteState extends State<ViewNote> {
         ));
   }
 
-  void delete()  {
-
-  /*widget.ref.delete();*/
-    Navigator.pop(context);
-  }
-
-  void save() async {
-    if (key.currentState!.validate()) {
-      /*await widget.ref.update(
-        {'title': title, 'note': des},*/
-
-      Navigator.of(context).pop();
-    }
-  }
 }
