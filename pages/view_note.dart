@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page_firebase_app/pages/reminder_page.dart';
 
 import '../model/note.dart';
 import '../service/firebase_note_service.dart';
@@ -57,6 +58,13 @@ class _ViewNoteState extends State<ViewNote> {
                 Navigator.of(context).pop();
               },
               child: const Icon(Icons.save_rounded)),
+          ElevatedButton(onPressed: () {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Remainder(),
+                ));
+          }, child: Icon(Icons.notifications)),
           ElevatedButton(
               onPressed: () {
                 FirebaseNoteService.instance.deleteNote(widget.note.id);

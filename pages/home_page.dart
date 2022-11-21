@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:login_page_firebase_app/pages/search_note.dart';
+import 'package:login_page_firebase_app/pages/side-menubar.dart';
 import 'package:login_page_firebase_app/pages/view_note.dart';
 import 'package:login_page_firebase_app/widgits/note_cell.dart';
 
@@ -30,6 +31,7 @@ class _HomepageState extends State<Homepage> {
 
   ScrollController scrollController = ScrollController();
    List<Note> notesList = [];
+  bool isListView = true;
   bool loadding = false;
 
   initialFetch() async {
@@ -46,10 +48,10 @@ class _HomepageState extends State<Homepage> {
       loadding = true;
     });
     print("fetch more");
-    List<Note> data2 = await FirebaseNoteService.instance.fetchMoreData();
+    List<Note> fetchedNotes = await FirebaseNoteService.instance.fetchMoreData();
 
     setState(() {
-      notesList.addAll(data2);
+      notesList.addAll(fetchedNotes);
       loadding = false;
     });
   }
@@ -85,14 +87,18 @@ class _HomepageState extends State<Homepage> {
     super.dispose();
     scrollController.dispose();
   }
+  final GlobalKey<ScaffoldState> _drawKey = GlobalKey();
 
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
+
       backgroundColor: Colors.white,
       endDrawerEnableOpenDragGesture: true,
+          key: _drawKey,
+          drawer: const SideBarMenu(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context)
@@ -108,6 +114,7 @@ class _HomepageState extends State<Homepage> {
         child: const Icon(Icons.add),
       ),
       body: Column(children: [
+
         Expanded(
           flex: 1,
           child: Container(
@@ -121,26 +128,26 @@ class _HomepageState extends State<Homepage> {
                 const SizedBox(
                   width: 10,
                 ),
+                IconButton(
+                    onPressed: () {
+                      _drawKey.currentState!.openDrawer();
+                    },
+                    icon: const Icon(Icons.menu)),
                 SizedBox(
                   height: 55,
                   width: 150,
+
 // )),
                   child: GestureDetector(
                     child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TextField(
-                              decoration: InputDecoration(
-                                  hintText: 'Search your notes',
-                                  border: InputBorder.none),
-                              onTap: () {
-                                Navigator.pushReplacementNamed(
-                                    context, 'search');
-                              }),
-                        ],
-                      ),
+                      child: TextField(
+                          decoration: InputDecoration(
+                              hintText: 'Search your notes',
+                              border: InputBorder.none),
+                          onTap: () {
+                            Navigator.pushReplacementNamed(
+                                context, 'search');
+                          }),
                     ),
                   ),
                 ),
@@ -148,11 +155,17 @@ class _HomepageState extends State<Homepage> {
                   children: [
                     Row(
                       children: [
+
                         const SizedBox(
                           width: 10,
                         ),
+
                         IconButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              setState(() {
+                                isListView = !isListView;
+                              });
+                            },
                             icon: const Icon(
                               Icons.grid_view_outlined,
                               size: 25,
@@ -167,6 +180,7 @@ class _HomepageState extends State<Homepage> {
                               Icons.logout,
                               size: 25,
                             )),
+
                       ],
                     ),
                   ],
@@ -179,11 +193,11 @@ class _HomepageState extends State<Homepage> {
           flex: 9,
           child: GridView.builder(
            controller: scrollController,
-            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 200,
-                childAspectRatio: 1,
-                crossAxisSpacing: 15,
-                mainAxisSpacing: 15),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: isListView ? 1 : 2,crossAxisSpacing: 3,
+             /* mainAxisSpacing: 4,*/
+
+            ),
             primary: false,
             shrinkWrap: true,
             itemCount: notesList.length,
@@ -225,3 +239,5 @@ class _HomepageState extends State<Homepage> {
     ));
   }
 }
+
+

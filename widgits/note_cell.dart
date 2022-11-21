@@ -32,6 +32,16 @@ class NoteCell extends StatelessWidget {
                   ),
                 ),
 
+                Text(
+                  /*"${note.createdAt}",*/
+                  "${DateTime.now()}",
+                  style: const TextStyle(
+                    fontSize: 20.0,
+                    fontWeight: FontWeight.normal,
+                    color: Colors.black45,
+                  ),
+                ),
+
               ],
             ),
           )),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:login_page_firebase_app/pages/reminder_page.dart';
 import 'package:login_page_firebase_app/service/firebase_note_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -18,7 +19,7 @@ class _AddNoteState extends State<AddNote> {
   late String description;
 
    void add() async {
-FirebaseNoteService.addNote(title!, description!);
+FirebaseNoteService.addNote(title, description,DateTime.now());
      /*Navigator.of(context).pop();*/
      Navigator.pop(context);
    }
@@ -39,9 +40,16 @@ FirebaseNoteService.addNote(title!, description!);
                 ElevatedButton(onPressed: () {
                   Navigator.of(context).pop();
                 }, child: Icon(Icons.arrow_back)),
+                ElevatedButton(onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Remainder(),
+                      ));
+                }, child: Icon(Icons.notification_add)),
                 ElevatedButton(
                     onPressed: (){
-                      FirebaseNoteService.addNote(title!, description!);
+                      FirebaseNoteService.addNote(title, description,DateTime.now()!);
                       /*Navigator.of(context).pop();*/
                       Navigator.pop(context);
                     },

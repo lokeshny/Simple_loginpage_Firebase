@@ -19,15 +19,27 @@ class FirebaseNoteService {
   static get uid => FirebaseAuth.instance.currentUser?.uid;
   static bool allLNotes = false;
 
-  static addNote(String title, String description) {
+  static addNote(String title, String description, DateTime createdAt) async {
     CollectionReference ref = FirebaseFirestore.instance
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection('notes');
 
-    final String id = Uuid().v4();
+    createdAt = DateTime.now();
 
-    var data = {'title': title, 'contents': description, 'id': id};
+    final String id = Uuid().v4();
+    DocumentReference document = ref.doc();
+    await ref.doc(document.id).set({
+      'id': document.id,
+      'title': title,
+      'content': description,
+      'createdAt': createdAt,
+    });
+    return document.id;
+
+    var data = {'title': title,
+      'contents': description,
+      'id': id};
     ref.add(data);
   }
 
@@ -42,6 +54,7 @@ class FirebaseNoteService {
       doc.reference.update({
         'title': note.title,
         'content': note.description,
+        'createdAt':note.createdAt,
       });
     }
     /*ref.doc(note.id!).update({
@@ -70,7 +83,7 @@ class FirebaseNoteService {
         .collection('users')
         .doc(FirebaseAuth.instance.currentUser?.uid)
         .collection("notes");
-    final snapshot = await ref.limit(10).get();
+    final snapshot = await ref.limit(6).get();
     if (snapshot.docs.isNotEmpty) {
       lastNote = snapshot.docs.last;
     }
@@ -78,6 +91,10 @@ class FirebaseNoteService {
     final notesList = snapshot.docs
         .map((document) => Note.fromDocumentsSnapshots(document))
         .toList();
+    if (snapshot.docs.length < 6) {
+      allLNotes = true;
+    }
+    return notesList;
     /*for (var element in snapshot.docs) {
       final data = element.data();
      */ /* final note = Note.fromDocumentsSnapshot(element.data());
@@ -99,7 +116,7 @@ class FirebaseNoteService {
       return [];
     }
     final snapshot =
-        await ref.orderBy("title").startAfterDocument(lastNote!).limit(10).get();
+        await ref.orderBy("title").startAfterDocument(lastNote!).limit(6).get();
 
     lastNote = snapshot.docs.last;
 
@@ -113,7 +130,7 @@ class FirebaseNoteService {
         final note = Note.fromDocumentsSnapshots(element);
         dataFromFb.add(note);
       }*/
-    if (snapshot.docs.length < 10) {
+    if (snapshot.docs.length < 6) {
       allLNotes = true;
     }
     return notesList;
